@@ -4,7 +4,7 @@ class Node:
         self.next = None
 
     def __repr__(self):
-        return repr(f"{self.data}, {self.next}")
+        return f"{self.data}"
 
 
 class LinkedList:
@@ -49,7 +49,7 @@ class LinkedList:
         prev.next = cur.next
         cur = None
 
-    def search_element(self, data: int) -> Node | None:
+    def search_element(self, data: int):
         cur = self.head
         while cur:
             if cur.data == data:
@@ -60,52 +60,85 @@ class LinkedList:
     def print_list(self):
         current = self.head
         while current:
-            print(current.data)
+            print(current.data, end=" -> ")
             current = current.next
+        print("None")
 
-    def reverse_list(self):
-        prev = None
-        current = self.head
-        while current:
-            next = current.next
-            current.next = prev
-            prev = current
-            current = next
-        self.head = prev
+    def sort(self):
+        self.head = merge_sort(self.head)
 
-    def split(self):
-        fast = self.head
-        slow = self.head
 
-        while fast and fast.next:
-            fast = fast.next.next
-            if fast:
-                slow = slow.next
+def reverse_list(list: LinkedList):
+    prev = None
+    current = list.head
+    while current:
+        next = current.next
+        current.next = prev
+        prev = current
+        current = next
+    return prev
 
-        second = slow.next
-        slow.next = None
+
+def split(head: Node) -> Node:
+    if head is None or head.next is None:
+        return head, None
+    slow = head
+    fast = head
+    while fast.next and fast.next.next:
+        slow = slow.next
+        fast = fast.next.next
+    second = slow.next
+    slow.next = None
+    return head, second
+
+
+def merge(first: Node, second: Node) -> Node:
+    if not first:
+        return second
+    if not second:
+        return first
+
+    if first.data < second.data:
+        first.next = merge(first.next, second)
+        return first
+    else:
+        second.next = merge(first, second.next)
         return second
 
-    def merge(self, first, second):
-        if not first:
-            return second
-        if not second:
-            return first
 
-        if first.data < second.data:
-            first.next = self.merge(self, first.next, second)
-            return first
+def merge_sort(head: Node) -> Node:
+    if not head or not head.next:
+        return head
+
+    first, second = split(head)
+
+    first = merge_sort(first)
+    second = merge_sort(second)
+
+    return merge(first, second)
+
+
+def merge_sorted_lists(list1: LinkedList, list2: LinkedList) -> LinkedList:
+    dummy = Node()
+    tail = dummy
+
+    l1 = list1.head
+    l2 = list2.head
+
+    while l1 and l2:
+        if l1.data < l2.data:
+            tail.next = l1
+            l1 = l1.next
         else:
-            second.next = self.merge(self, first, second.next)
-            return second
+            tail.next = l2
+            l2 = l2.next
+        tail = tail.next
 
-    def merge_sort(self):
-        if not self.head or not self.head.next:
-            return head
+    if l1:
+        tail.next = l1
+    if l2:
+        tail.next = l2
 
-        second = self.split(head)
-
-        head = self.merge_sort(head)
-        second = self.merge_sort(second)
-
-        return self.merge(self, head, second)
+    merged_list = LinkedList()
+    merged_list.head = dummy.next
+    return merged_list
